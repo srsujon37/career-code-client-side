@@ -1,43 +1,53 @@
 import React from "react";
-import UseAuth from './../../Hooks/UseAuth';
-import { axios } from 'axios';
+import UseAuth from "./../../Hooks/UseAuth";
+import axios from "axios";
+import Swal from 'sweetalert2'
 
 const AddJob = () => {
-  const {user} = UseAuth();
+  const { user } = UseAuth();
 
-  const handleAddAJob = e =>{
+  const handleAddAJob = (e) => {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries())
+    const data = Object.fromEntries(formData.entries());
 
     // process salary range data
-    const {min, max, currency, ...newJob} = data;
-    newJob.salaryRange = {min, max, currency}
+    const { min, max, currency, ...newJob } = data;
+    newJob.salaryRange = { min, max, currency };
 
     // process requirements data
     const requirementsString = newJob.requirements;
-    const requirementsDirty = requirementsString.split(',')
-    const requirementsClean = requirementsDirty.map(req => req.trim())
+    const requirementsDirty = requirementsString.split(",");
+    const requirementsClean = requirementsDirty.map((req) => req.trim());
     newJob.requirements = requirementsClean;
 
     // process responsibilities
-    newJob.responsibilities = newJob.responsibilities.split(',').map(res => res.trim())
-    
+    newJob.responsibilities = newJob.responsibilities
+      .split(",")
+      .map((res) => res.trim());
+
     newJob.status = "active";
 
     console.log(newJob);
 
     // save job to the database
-    axios.post('http://localhost:3000/jobs/', newJob)
-      .then(res => {
-        console.log(res);
+    axios.post("http://localhost:3000/jobs/", newJob)
+      .then((res) => {
+        if (res.data.insertedId) {
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "This new Job has been saved and published",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
       })
-      .catch(error =>{
+      .catch((error) => {
         console.log(error);
-      })
-
-  }
+      });
+  };
   return (
     <div>
       <h1 className="text-3xl font-semibold text-center">Add a Job</h1>
@@ -92,14 +102,14 @@ const AddJob = () => {
               type="radio"
               name="jobType"
               aria-label="On-Site"
-              value='on-site'
+              value="on-site"
             />
             <input
               className="btn"
               type="radio"
               name="jobType"
               aria-label="Remote"
-              value='remote'
+              value="remote"
             />
             <input
               className="btn"
@@ -218,7 +228,6 @@ const AddJob = () => {
             className="input w-full"
             placeholder="HR Email"
           />
-
         </fieldset>
 
         <input type="submit" value="Add job" className="btn w-full" />
